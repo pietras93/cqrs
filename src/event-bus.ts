@@ -1,5 +1,5 @@
 import { Injectable, Type } from '@nestjs/common';
-import { Observable } from 'rxjs';
+import { Observable, throwError } from 'rxjs';
 import { filter } from 'rxjs/operators';
 import { CommandBus } from './command-bus';
 import { InvalidSagaException } from './exceptions/invalid-saga.exception';
@@ -42,7 +42,13 @@ export class EventBus extends ObservableBus<IEvent> implements IEventBus {
 
   bind<T extends IEvent>(handler: IEventHandler<IEvent>, name: string) {
     const stream$ = name ? this.ofEventName(name) : this.subject$;
-    stream$.subscribe(event => handler.handle(event));
+    stream$.subscribe(async (event) => {
+      try {
+        await handler.handle(event)
+      } catch (err) {
+        throwError(err);
+      }
+    });
   }
 
   combineSagas(sagas: Saga[]) {
