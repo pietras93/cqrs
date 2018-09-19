@@ -10,7 +10,9 @@ export class DefaultPubSub implements IEventPublisher, IMessageSource {
     if (!this.subject$) {
       throw new Error('Invalid underlying subject (call bridgeEventsTo())');
     }
-    this.subject$.next(event).catch(err => {
+
+    // ts-lint-ignore
+    this.subject$.next(event).error(err => {
       throw err;
     });
   }
