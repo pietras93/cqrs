@@ -4,6 +4,7 @@ function __export(m) {
 }
 Object.defineProperty(exports, "__esModule", { value: true });
 __export(require("./command-not-found.exception"));
+__export(require("./event-not-found.exception"));
 __export(require("./invalid-saga.exception"));
 __export(require("./invalid-command-handler.exception"));
 __export(require("./invalid-events-handler.exception"));

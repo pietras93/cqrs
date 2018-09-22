@@ -8,6 +8,14 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : new P(function (resolve) { resolve(result.value); }).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 const common_1 = require("@nestjs/common");
 const event_bus_1 = require("./event-bus");
@@ -19,15 +27,17 @@ let EventPublisher = class EventPublisher {
         const eventBus = this.eventBus;
         return class extends metatype {
             publish(event) {
-                eventBus.publish(event);
+                return __awaiter(this, void 0, void 0, function* () {
+                    yield eventBus.execute(event);
+                });
             }
         };
     }
     mergeObjectContext(object) {
         const eventBus = this.eventBus;
-        object.publish = (event) => {
-            eventBus.publish(event);
-        };
+        object.publish = (event) => __awaiter(this, void 0, void 0, function* () {
+            yield eventBus.execute(event);
+        });
         return object;
     }
 };

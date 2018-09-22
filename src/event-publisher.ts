@@ -14,16 +14,16 @@ export class EventPublisher {
   mergeClassContext<T extends Constructor<AggregateRoot>>(metatype: T): T {
     const eventBus = this.eventBus;
     return class extends metatype {
-      publish(event: IEvent) {
-        eventBus.publish(event);
+      async publish(event: IEvent) {
+        await eventBus.execute(event);
       }
     };
   }
 
   mergeObjectContext<T extends AggregateRoot>(object: T): T {
     const eventBus = this.eventBus;
-    object.publish = (event: IEvent) => {
-      eventBus.publish(event);
+    object.publish = async (event: IEvent) => {
+      await eventBus.execute(event);
     };
     return object;
   }

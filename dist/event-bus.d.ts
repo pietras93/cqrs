@@ -11,10 +11,12 @@ export declare class EventBus extends ObservableBus<IEvent>
   private readonly commandBus;
   private moduleRef;
   private _publisher;
+  private handlers;
   constructor(commandBus: CommandBus);
   private useDefaultPublisher();
   setModuleRef(moduleRef: any): void;
   publish<T extends IEvent>(event: T): void;
+  execute(event: any): Promise<any>;
   ofType<T extends IEvent>(
     event: T & {
       name: string;

@@ -7,7 +7,7 @@ export abstract class AggregateRoot {
   publish(event: IEvent) {}
 
   commit() {
-    this.events.forEach((event) => this.publish(event));
+    this.events.forEach(event => this.publish(event));
     this.events.length = 0;
   }
 
@@ -23,11 +23,14 @@ export abstract class AggregateRoot {
     history.forEach(event => this.apply(event, true));
   }
 
-  apply(event: IEvent, isFromHistory = false) {
+  async apply(event: IEvent, isFromHistory = false) {
     if (!isFromHistory && !this.autoCommit) {
       this.events.push(event);
     }
-    this.autoCommit && this.publish(event);
+
+    if (this.autoCommit) {
+      await this.publish(event);
+    }
 
     const handler = this.getEventHandler(event);
     handler && handler.call(this, event);

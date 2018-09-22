@@ -1,4 +1,5 @@
 import { Subject } from 'rxjs';
+import { catchError } from 'rxjs/operators';
 import { IEvent } from '../interfaces';
 import { IEventPublisher } from '../interfaces/events/event-publisher.interface';
 import { IMessageSource } from '../interfaces/events/message-source.interface';
@@ -11,10 +12,13 @@ export class DefaultPubSub implements IEventPublisher, IMessageSource {
       throw new Error('Invalid underlying subject (call bridgeEventsTo())');
     }
 
-    // ts-lint-ignore
-    this.subject$.next(event).error(err => {
-      throw err;
-    });
+    this.subject$.pipe(
+      catchError(err => {
+        console.log(err);
+        throw err;
+      }),
+    );
+    this.subject$.next(event);
   }
 
   bridgeEventsTo<T extends IEvent>(subject: Subject<T>) {

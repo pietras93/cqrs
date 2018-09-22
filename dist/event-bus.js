@@ -21,6 +21,7 @@ const common_1 = require("@nestjs/common");
 const rxjs_1 = require("rxjs");
 const operators_1 = require("rxjs/operators");
 const command_bus_1 = require("./command-bus");
+const event_not_found_exception_1 = require("./exceptions/event-not-found.exception");
 const invalid_saga_exception_1 = require("./exceptions/invalid-saga.exception");
 const index_1 = require("./index");
 const constants_1 = require("./utils/constants");
@@ -31,6 +32,7 @@ let EventBus = class EventBus extends observable_bus_1.ObservableBus {
         super();
         this.commandBus = commandBus;
         this.moduleRef = null;
+        this.handlers = new Map();
         this.useDefaultPublisher();
     }
     useDefaultPublisher() {
@@ -44,19 +46,21 @@ let EventBus = class EventBus extends observable_bus_1.ObservableBus {
     publish(event) {
         this._publisher.publish(event);
     }
+    execute(event) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const handler = this.handlers.get(this.getEventName(event));
+            if (!handler) {
+                throw new event_not_found_exception_1.EventHandlerNotFoundException();
+            }
+            this.subject$.next(event);
+            return yield handler.handle(event);
+        });
+    }
     ofType(event) {
         return this.ofEventName(event.name);
     }
     bind(handler, name) {
-        const stream$ = name ? this.ofEventName(name) : this.subject$;
-        stream$.subscribe((event) => __awaiter(this, void 0, void 0, function* () {
-            try {
-                yield handler.handle(event);
-            }
-            catch (err) {
-                rxjs_1.throwError(err);
-            }
-        }));
+        this.handlers.set(name, handler);
     }
     combineSagas(sagas) {
         [].concat(sagas).map(saga => this.registerSaga(saga));

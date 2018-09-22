@@ -2,6 +2,7 @@ import { Injectable, Type } from '@nestjs/common';
 import { Observable, throwError } from 'rxjs';
 import { filter } from 'rxjs/operators';
 import { CommandBus } from './command-bus';
+import { EventHandlerNotFoundException } from './exceptions/event-not-found.exception';
 import { InvalidSagaException } from './exceptions/invalid-saga.exception';
 import { InvalidModuleRefException, Saga } from './index';
 import { IEventPublisher } from './interfaces/events/event-publisher.interface';
@@ -16,6 +17,7 @@ export type EventHandlerMetatype = Type<IEventHandler<IEvent>>;
 export class EventBus extends ObservableBus<IEvent> implements IEventBus {
   private moduleRef = null;
   private _publisher: IEventPublisher;
+  private handlers = new Map<string, IEventHandler<IEvent>>();
 
   constructor(private readonly commandBus: CommandBus) {
     super();
@@ -36,19 +38,21 @@ export class EventBus extends ObservableBus<IEvent> implements IEventBus {
     this._publisher.publish(event);
   }
 
+  async execute(event) {
+    const handler = this.handlers.get(this.getEventName(event));
+    if (!handler) {
+      throw new EventHandlerNotFoundException();
+    }
+    this.subject$.next(event);
+    return await handler.handle(event);
+  }
+
   ofType<T extends IEvent>(event: T & { name: string }) {
     return this.ofEventName(event.name);
   }
 
   bind<T extends IEvent>(handler: IEventHandler<IEvent>, name: string) {
-    const stream$ = name ? this.ofEventName(name) : this.subject$;
-    stream$.subscribe(async (event) => {
-      try {
-        await handler.handle(event)
-      } catch (err) {
-        throwError(err);
-      }
-    });
+    this.handlers.set(name, handler);
   }
 
   combineSagas(sagas: Saga[]) {
