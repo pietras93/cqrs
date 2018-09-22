@@ -6,8 +6,10 @@ export abstract class AggregateRoot {
 
   publish(event: IEvent) {}
 
-  commit() {
-    this.events.forEach(event => this.publish(event));
+  async commit() {
+    for (let event of this.events) {
+      await this.publish(event);
+    }
     this.events.length = 0;
   }
 
