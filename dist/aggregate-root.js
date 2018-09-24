@@ -15,8 +15,12 @@ class AggregateRoot {
     }
     publish(event) { }
     commit() {
-        this.events.forEach((event) => this.publish(event));
-        this.events.length = 0;
+        return __awaiter(this, void 0, void 0, function* () {
+            for (let event of this.events) {
+                yield this.publish(event);
+            }
+            this.events.length = 0;
+        });
     }
     uncommit() {
         this.events.length = 0;

@@ -3,7 +3,7 @@ export abstract class AggregateRoot {
   private readonly events;
   autoCommit: boolean;
   publish(event: IEvent): void;
-  commit(): void;
+  commit(): Promise<void>;
   uncommit(): void;
   getUncommittedEvents(): IEvent[];
   loadFromHistory(history: IEvent[]): void;
