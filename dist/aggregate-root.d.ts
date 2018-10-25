@@ -8,6 +8,6 @@ export abstract class AggregateRoot {
   getUncommittedEvents(): IEvent[];
   loadFromHistory(history: IEvent[]): void;
   apply(event: IEvent, isFromHistory?: boolean): Promise<void>;
-  private getEventHandler(event);
-  private getEventName(event);
+  getEventHandler(event: IEvent): Function | undefined;
+  getEventName(event: any): string;
 }
