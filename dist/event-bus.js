@@ -85,6 +85,9 @@ let EventBus = class EventBus extends observable_bus_1.ObservableBus {
         const { constructor } = Object.getPrototypeOf(event);
         return constructor.name;
     }
+    getEventHandler(name) {
+        return this.handlers.get(name);
+    }
     registerSaga(saga) {
         const stream$ = saga(this);
         if (!(stream$ instanceof rxjs_1.Observable)) {

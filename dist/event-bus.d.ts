@@ -28,6 +28,7 @@ export declare class EventBus extends ObservableBus<IEvent>
   protected registerHandler(handler: EventHandlerMetatype): void;
   protected ofEventName(name: string): Observable<IEvent>;
   private getEventName(event);
+  getEventHandler(name: any): IEventHandler<IEvent>;
   protected registerSaga(saga: Saga): void;
   private reflectEventsNames(handler);
   publisher: IEventPublisher;

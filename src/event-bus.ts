@@ -88,6 +88,10 @@ export class EventBus extends ObservableBus<IEvent> implements IEventBus {
     return constructor.name as string;
   }
 
+  getEventHandler(name): IEventHandler<IEvent> {
+    return this.handlers.get(name);
+  }
+
   protected registerSaga(saga: Saga) {
     const stream$ = saga(this);
     if (!(stream$ instanceof Observable)) {

@@ -38,12 +38,12 @@ export abstract class AggregateRoot {
     handler && handler.call(this, event);
   }
 
-  getEventHandler(event: IEvent): Function | undefined {
+  private getEventHandler(event: IEvent): Function | undefined {
     const handler = `on${this.getEventName(event)}`;
     return this[handler];
   }
 
-  getEventName(event): string {
+  private getEventName(event): string {
     const { constructor } = Object.getPrototypeOf(event);
     return constructor.name as string;
   }
