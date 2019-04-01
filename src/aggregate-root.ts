@@ -4,11 +4,11 @@ export abstract class AggregateRoot {
   private readonly events: IEvent[] = [];
   public autoCommit = false;
 
-  publish(event: IEvent) {}
+  publish(event: IEvent, handlerInstance: any) {}
 
   async commit() {
     for (let event of this.events) {
-      await this.publish(event);
+      await this.publish(event, null);
     }
     this.events.length = 0;
   }
@@ -25,13 +25,13 @@ export abstract class AggregateRoot {
     history.forEach(event => this.apply(event, true));
   }
 
-  async apply(event: IEvent, isFromHistory = false) {
+  async apply(event: IEvent, handlerInstance: any, isFromHistory = false) {
     if (!isFromHistory && !this.autoCommit) {
       this.events.push(event);
     }
 
     if (this.autoCommit) {
-      await this.publish(event);
+      await this.publish(event, handlerInstance);
     }
 
     const handler = this.getEventHandler(event);

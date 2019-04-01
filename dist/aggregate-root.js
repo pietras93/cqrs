@@ -13,11 +13,11 @@ class AggregateRoot {
         this.events = [];
         this.autoCommit = false;
     }
-    publish(event) { }
+    publish(event, handlerInstance) { }
     commit() {
         return __awaiter(this, void 0, void 0, function* () {
             for (let event of this.events) {
-                yield this.publish(event);
+                yield this.publish(event, null);
             }
             this.events.length = 0;
         });
@@ -31,13 +31,13 @@ class AggregateRoot {
     loadFromHistory(history) {
         history.forEach(event => this.apply(event, true));
     }
-    apply(event, isFromHistory = false) {
+    apply(event, handlerInstance, isFromHistory = false) {
         return __awaiter(this, void 0, void 0, function* () {
             if (!isFromHistory && !this.autoCommit) {
                 this.events.push(event);
             }
             if (this.autoCommit) {
-                yield this.publish(event);
+                yield this.publish(event, handlerInstance);
             }
             const handler = this.getEventHandler(event);
             handler && handler.call(this, event);

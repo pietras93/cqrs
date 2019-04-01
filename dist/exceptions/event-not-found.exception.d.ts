@@ -1,4 +1,4 @@
 export declare class EventHandlerNotFoundException {
-  readonly message: string;
-  constructor(message?: string);
+    readonly message: string;
+    constructor(message?: string);
 }

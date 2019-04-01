@@ -26,17 +26,17 @@ let EventPublisher = class EventPublisher {
     mergeClassContext(metatype) {
         const eventBus = this.eventBus;
         return class extends metatype {
-            publish(event) {
+            publish(event, handler) {
                 return __awaiter(this, void 0, void 0, function* () {
-                    yield eventBus.execute(event);
+                    yield eventBus.execute(event, handler);
                 });
             }
         };
     }
     mergeObjectContext(object) {
         const eventBus = this.eventBus;
-        object.publish = (event) => __awaiter(this, void 0, void 0, function* () {
-            yield eventBus.execute(event);
+        object.publish = (event, handler) => __awaiter(this, void 0, void 0, function* () {
+            yield eventBus.execute(event, handler);
         });
         return object;
     }

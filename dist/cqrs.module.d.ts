@@ -1,1 +1,2 @@
-export declare class CQRSModule {}
+export declare class CQRSModule {
+}

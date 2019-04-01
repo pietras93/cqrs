@@ -17,7 +17,7 @@ export type EventHandlerMetatype = Type<IEventHandler<IEvent>>;
 export class EventBus extends ObservableBus<IEvent> implements IEventBus {
   private moduleRef = null;
   private _publisher: IEventPublisher;
-  private handlers = new Map<string, IEventHandler<IEvent>>();
+  private handlers = new Map<string, EventHandlerMetatype>();
 
   constructor(private readonly commandBus: CommandBus) {
     super();
@@ -34,12 +34,11 @@ export class EventBus extends ObservableBus<IEvent> implements IEventBus {
     this.moduleRef = moduleRef;
   }
 
-  publish<T extends IEvent>(event: T) {
-    this._publisher.publish(event);
+  publish<T extends IEvent>(event: T, handler: any) {
+    this._publisher.publish(event, handler);
   }
 
-  async execute(event) {
-    const handler = this.handlers.get(this.getEventName(event));
+  async execute(event, handler) {
     if (!handler) {
       throw new EventHandlerNotFoundException();
     }
@@ -51,7 +50,7 @@ export class EventBus extends ObservableBus<IEvent> implements IEventBus {
     return this.ofEventName(event.name);
   }
 
-  bind<T extends IEvent>(handler: IEventHandler<IEvent>, name: string) {
+  bind<T extends IEvent>(handler: EventHandlerMetatype, name: string) {
     this.handlers.set(name, handler);
   }
 
@@ -64,16 +63,9 @@ export class EventBus extends ObservableBus<IEvent> implements IEventBus {
   }
 
   protected registerHandler(handler: EventHandlerMetatype) {
-    if (!this.moduleRef) {
-      throw new InvalidModuleRefException();
-    }
-
-    const instance = this.moduleRef.get(handler);
-    if (!instance) return;
-
     const eventsNames = this.reflectEventsNames(handler);
     eventsNames.map(event =>
-      this.bind(instance as IEventHandler<IEvent>, event.name),
+      this.bind(handler, event.name),
     );
   }
 
@@ -86,6 +78,10 @@ export class EventBus extends ObservableBus<IEvent> implements IEventBus {
   private getEventName(event): string {
     const { constructor } = Object.getPrototypeOf(event);
     return constructor.name as string;
+  }
+
+  protected getEventHandler(name) {
+    return this.handlers.get(name);
   }
 
   protected registerSaga(saga: Saga) {

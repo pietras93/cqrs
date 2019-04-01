@@ -23,7 +23,6 @@ const operators_1 = require("rxjs/operators");
 const command_bus_1 = require("./command-bus");
 const event_not_found_exception_1 = require("./exceptions/event-not-found.exception");
 const invalid_saga_exception_1 = require("./exceptions/invalid-saga.exception");
-const index_1 = require("./index");
 const constants_1 = require("./utils/constants");
 const default_pubsub_1 = require("./utils/default-pubsub");
 const observable_bus_1 = require("./utils/observable-bus");
@@ -43,12 +42,11 @@ let EventBus = class EventBus extends observable_bus_1.ObservableBus {
     setModuleRef(moduleRef) {
         this.moduleRef = moduleRef;
     }
-    publish(event) {
-        this._publisher.publish(event);
+    publish(event, handler) {
+        this._publisher.publish(event, handler);
     }
-    execute(event) {
+    execute(event, handler) {
         return __awaiter(this, void 0, void 0, function* () {
-            const handler = this.handlers.get(this.getEventName(event));
             if (!handler) {
                 throw new event_not_found_exception_1.EventHandlerNotFoundException();
             }
@@ -69,14 +67,8 @@ let EventBus = class EventBus extends observable_bus_1.ObservableBus {
         handlers.forEach(handler => this.registerHandler(handler));
     }
     registerHandler(handler) {
-        if (!this.moduleRef) {
-            throw new index_1.InvalidModuleRefException();
-        }
-        const instance = this.moduleRef.get(handler);
-        if (!instance)
-            return;
         const eventsNames = this.reflectEventsNames(handler);
-        eventsNames.map(event => this.bind(instance, event.name));
+        eventsNames.map(event => this.bind(handler, event.name));
     }
     ofEventName(name) {
         return this.subject$.pipe(operators_1.filter(event => this.getEventName(event) === name));
@@ -84,6 +76,9 @@ let EventBus = class EventBus extends observable_bus_1.ObservableBus {
     getEventName(event) {
         const { constructor } = Object.getPrototypeOf(event);
         return constructor.name;
+    }
+    getEventHandler(name) {
+        return this.handlers.get(name);
     }
     registerSaga(saga) {
         const stream$ = saga(this);
